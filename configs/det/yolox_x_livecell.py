@@ -72,9 +72,9 @@ train_dataset = dict(
     dataset=dict(
         type=dataset_type,
         classes=classes,
-        ann_file=data_root + 'LIVECell_official/train_8class.json',
+        ann_file=data_root + 'LIVECell_dataset_2021/train_8class.json',
         img_prefix=data_root +
-        'LIVECell_official/images/livecell_train_val_images',
+        'LIVECell_dataset_2021/images/livecell_train_val_images',
         pipeline=[
             dict(type='LoadImageFromFile', to_float32=True),
             dict(type='LoadAnnotations', with_bbox=True)
@@ -112,17 +112,17 @@ data = dict(
     val=dict(
         type=dataset_type,
         classes=classes,
-        ann_file=data_root + 'LIVECell_official/val_8class.json',
+        ann_file=data_root + 'LIVECell_dataset_2021/val_8class.json',
         img_prefix=data_root +
-        'LIVECell_official/images/livecell_train_val_images',
+        'LIVECell_dataset_2021/images/livecell_train_val_images',
         pipeline=test_pipeline,
     ),
     test=dict(
         type=dataset_type,
         classes=classes,
-        ann_file=data_root + 'LIVECell_official/val_8class.json',
+        ann_file=data_root + 'LIVECell_dataset_2021/val_8class.json',
         img_prefix=data_root +
-        'LIVECell_official/images/livecell_train_val_images',
+        'LIVECell_dataset_2021/images/livecell_train_val_images',
         pipeline=test_pipeline,
     ),
 )
