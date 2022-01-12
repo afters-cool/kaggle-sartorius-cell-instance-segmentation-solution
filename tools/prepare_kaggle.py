@@ -77,9 +77,9 @@ def df2coco(df):
 
 
 def main():
-    df = pd.read_csv('../data/train.csv')
+    df = pd.read_csv('/home/testmony/workspace/kg_sartorius/input/sartorius-cell-instance-segmentation/train.csv')
     dtrainval = df2coco(df)
-    mmcv.dump(dtrainval, '../data/dtrainval.json')
+    mmcv.dump(dtrainval, '/home/testmony/workspace/kg_sartorius/input/sartorius-cell-instance-segmentation/dtrainval.json')
 
     all_samples = np.array(sorted(set(df['sample_id'])))
     sample2celltype = dict(zip(df['sample_id'], df['cell_type']))
@@ -90,12 +90,12 @@ def main():
         train_samples = all_samples[train_inds]
         train_df = df[df['sample_id'].isin(train_samples)]
         train_coco = df2coco(train_df)
-        mmcv.dump(train_coco, f'../data/dtrain_g{fold}.json')
+        mmcv.dump(train_coco, f'/home/testmony/workspace/kg_sartorius/input/sartorius-cell-instance-segmentation/dtrain_g{fold}.json')
 
         val_samples = all_samples[val_inds]
         val_df = df[df['sample_id'].isin(val_samples)]
         val_coco = df2coco(val_df)
-        mmcv.dump(val_coco, f'../data/dval_g{fold}.json')
+        mmcv.dump(val_coco, f'/home/testmony/workspace/kg_sartorius/input/sartorius-cell-instance-segmentation/dval_g{fold}.json')
 
         # break
 
