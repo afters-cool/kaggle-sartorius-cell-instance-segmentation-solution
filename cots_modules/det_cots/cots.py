@@ -29,6 +29,7 @@ class COCOevalMaxDets(COCOeval_opt):
     Modified version of COCOeval for evaluating AP with a custom
     maxDets (by default for COCO, maxDets is 100)
     """
+
     def summarize(self):
         """
         Compute and display summary metrics for evaluation results given
@@ -44,7 +45,8 @@ class COCOevalMaxDets(COCOeval_opt):
                 if iouThr is None else "{:0.2f}".format(iouThr)
             )
 
-            aind = [i for i, aRng in enumerate(p.areaRngLbl) if aRng == areaRng]
+            aind = [i for i, aRng in enumerate(
+                p.areaRngLbl) if aRng == areaRng]
             mind = [i for i, mDet in enumerate(p.maxDets) if mDet == maxDets]
             if ap == 1:
                 # dimension of precision: [TxRxKxAxM]
@@ -76,7 +78,8 @@ class COCOevalMaxDets(COCOeval_opt):
             stats = np.zeros((12, ))
             # Evaluate AP using the custom limit on maximum detections per image
             stats[0] = _summarize(1, maxDets=self.params.maxDets[2])
-            stats[1] = _summarize(1, iouThr=0.5, maxDets=self.params.maxDets[2])
+            stats[1] = _summarize(
+                1, iouThr=0.5, maxDets=self.params.maxDets[2])
             stats[2] = _summarize(
                 1, iouThr=0.75, maxDets=self.params.maxDets[2]
             )
@@ -131,7 +134,8 @@ class COCOevalMaxDets(COCOeval_opt):
 
 
 @DATASETS.register_module()
-class CellDataset(_CocoDataset):
+#class CellDataset(_CocoDataset):
+class COTSDataset(_CocoDataset):
     def evaluate(
         self,
         results,

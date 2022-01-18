@@ -1,6 +1,6 @@
 import sys
 sys.path.append('.')
-import cell_modules
+import cots_modules
 import cv2
 cv2.setNumThreads(0)
 
