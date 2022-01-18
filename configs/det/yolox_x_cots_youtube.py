@@ -1,5 +1,6 @@
 fp16 = dict(loss_scale=512.)
-img_scale = (1280, 1280)
+#img_scale = (1280, 1280)
+img_scale = (1536, 1536)
 num_last_epochs = 5
 
 # model settings
@@ -14,7 +15,7 @@ model = dict(
         width=1.25,
         init_cfg=dict(
             type='Pretrained',
-            checkpoint='/data/cots-seq-youtube-yolox-pseudo-v3/checkpoints/yolox_x_coco.pth',
+            checkpoint='/data/cots-youtube-yolox-pseudo-v3/checkpoints/yolox_x_coco.pth',
             prefix='backbone'
         )
     ),
@@ -26,7 +27,7 @@ model = dict(
         in_channels=[256, 512, 1024],
         init_cfg=dict(
             type='Pretrained',
-            checkpoint='/data/cots-seq-youtube-yolox-pseudo-v3/checkpoints/yolox_x_coco.pth',
+            checkpoint='/data/cots-youtube-yolox-pseudo-v3/checkpoints/yolox_x_coco.pth',
             prefix='head'
         )
     ),
@@ -72,9 +73,9 @@ train_dataset = dict(
     dataset=dict(
         type=dataset_type,
         classes=classes,
-        ann_file=data_root + 'cots-seq-youtube-yolox-pseudo-v3/annotations/train.json',
+        ann_file=data_root + 'cots-youtube-yolox-pseudo-v3/annotations/train.json',
         img_prefix=data_root +
-        'cots-seq-youtube-yolox-pseudo-v3/train2017',
+        'cots-youtube-yolox-pseudo-v3/train2017',
         pipeline=[
             dict(type='LoadImageFromFile', to_float32=True),
             dict(type='LoadAnnotations', with_bbox=True)
@@ -105,25 +106,25 @@ test_pipeline = [
 ]
 
 data = dict(
-    samples_per_gpu=2,
+    samples_per_gpu=4,
     workers_per_gpu=4,
     # persistent_workers=True,
     train=train_dataset,
     val=dict(
         type=dataset_type,
         classes=classes,
-        ann_file=data_root + 'cots-seq-youtube-yolox-pseudo-v3/annotations/valid.json',
+        ann_file=data_root + 'cots-youtube-yolox-pseudo-v3/annotations/valid.json',
         img_prefix=data_root +
-        'cots-seq-youtube-yolox-pseudo-v3/valid2017',
+        'cots-youtube-yolox-pseudo-v3/valid2017',
 
         pipeline=test_pipeline,
     ),
     test=dict(
         type=dataset_type,
         classes=classes,
-        ann_file=data_root + 'cots-seq-youtube-yolox-pseudo-v3/annotations/valid.json',
+        ann_file=data_root + 'cots-youtube-yolox-pseudo-v3/annotations/valid.json',
         img_prefix=data_root +
-        'cots-seq-youtube-yolox-pseudo-v3/valid2017',
+        'cots-youtube-yolox-pseudo-v3/valid2017',
         pipeline=test_pipeline,
     ),
 )
@@ -151,7 +152,8 @@ lr_config = dict(
     min_lr_ratio=0.05
 )
 
-runner = dict(type='EpochBasedRunner', max_epochs=15)
+#runner = dict(type='EpochBasedRunner', max_epochs=15)
+runner = dict(type='EpochBasedRunner', max_epochs=30)
 checkpoint_config = dict(interval=1)
 log_config = dict(interval=10, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
