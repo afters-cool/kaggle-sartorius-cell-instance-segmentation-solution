@@ -1,7 +1,5 @@
 fp16 = dict(loss_scale=512.)
-#img_scale = (1280, 1280)
 img_scale = (1536, 1536)
-num_last_epochs = 5
 
 # model settings
 model = dict(
@@ -9,27 +7,13 @@ model = dict(
     input_size=img_scale,
     random_size_range=(32, 64),
     random_size_interval=1,
-    backbone=dict(
-        type='YOLOPAFPNOfficial',
-        depth=1.33,
-        width=1.25,
-        init_cfg=dict(
-            type='Pretrained',
-            checkpoint='/data/external_datasets/cots-youtube-yolox-pseudo-v3/checkpoints/yolox_x_coco.pth',
-            prefix='backbone'
-        )
-    ),
+    backbone=dict(type='YOLOPAFPNOfficial', depth=1.33, width=1.25),
     neck=None,
     bbox_head=dict(
         type='YOLOXHeadOfficial',
         num_classes=1,
         width=1.25,
-        in_channels=[256, 512, 1024],
-        init_cfg=dict(
-            type='Pretrained',
-            checkpoint='/data/external_datasets/cots-youtube-yolox-pseudo-v3/checkpoints/yolox_x_coco.pth',
-            prefix='head'
-        )
+        in_channels=[256, 512, 1024]
     ),
     train_cfg=dict(assigner=dict(type='SimOTAAssigner', center_radius=2.5)),
     test_cfg=dict(score_thr=0.01, nms=dict(type='nms', iou_threshold=0.65))
@@ -61,7 +45,9 @@ train_pipeline = [
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='Resize', img_scale=img_scale, keep_ratio=True),
     dict(
-        type='Pad', pad_to_square=True, pad_val=dict(img=(114.0, 114.0, 114.0))
+        type='Pad',
+        pad_to_square=True,
+        pad_val=dict(img=(114.0, 114.0, 114.0))
     ),
     dict(type='FilterAnnotations', min_gt_bbox_wh=(1, 1), keep_empty=False),
     dict(type='DefaultFormatBundle'),
@@ -73,9 +59,8 @@ train_dataset = dict(
     dataset=dict(
         type=dataset_type,
         classes=classes,
-        ann_file=data_root + 'external_datasets/cots-youtube-yolox-pseudo-v3/annotations/train.json',
-        img_prefix=data_root +
-        'external_datasets/cots-youtube-yolox-pseudo-v3/train2017',
+        ann_file=data_root + 'yolox_3fold/01/annotations/train.json',
+        img_prefix=data_root + 'yolox_3fold/01/train2017',
         pipeline=[
             dict(type='LoadImageFromFile', to_float32=True),
             dict(type='LoadAnnotations', with_bbox=True)
@@ -113,24 +98,21 @@ data = dict(
     val=dict(
         type=dataset_type,
         classes=classes,
-        ann_file=data_root + 'external_datasets/cots-youtube-yolox-pseudo-v3/annotations/valid.json',
-        img_prefix=data_root +
-        'external_datasets/cots-youtube-yolox-pseudo-v3/valid2017',
-
+        ann_file=data_root + 'yolox_3fold/01/annotations/train.json',
+        img_prefix=data_root + 'yolox_3fold/01/train2017',
         pipeline=test_pipeline,
     ),
     test=dict(
         type=dataset_type,
         classes=classes,
-        ann_file=data_root + 'external_datasets/cots-youtube-yolox-pseudo-v3/annotations/valid.json',
-        img_prefix=data_root +
-        'external_datasets/cots-youtube-yolox-pseudo-v3/valid2017',
+        ann_file=data_root + 'yolox_3fold/01/annotations/valid.json',
+        img_prefix=data_root + 'yolox_3fold/01/valid2017',
         pipeline=test_pipeline,
     ),
 )
 optimizer = dict(
     type='SGD',
-    lr=0.01 / 64,
+    lr=0.005 / 64,
     momentum=0.9,
     weight_decay=0.0005,
     nesterov=True,
@@ -141,38 +123,35 @@ optimizer_config = dict(grad_clip=None)
 evaluation = dict(
     interval=1, metric='bbox', classwise=True, proposal_nums=(100, 300, 2000)
 )
+
+# num_last_epochs = 5
 lr_config = dict(
     policy='YOLOX',
     warmup='exp',
     by_epoch=False,
     warmup_by_epoch=True,
     warmup_ratio=1,
-    warmup_iters=1,
-    num_last_epochs=num_last_epochs,
-    min_lr_ratio=0.05
+    warmup_iters=3,
+    num_last_epochs=5,
+    min_lr_ratio=0.01
 )
 
-#runner = dict(type='EpochBasedRunner', max_epochs=15)
 runner = dict(type='EpochBasedRunner', max_epochs=30)
-checkpoint_config = dict(interval=1)
+checkpoint_config = dict(interval=5)
 log_config = dict(interval=10, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = None
+load_from = 'work_dirs/yolox_x_cots_youtube/epoch_30.pth'
 resume_from = None
 workflow = [('train', 1)]
 custom_hooks = [
+    dict(type='YOLOXModeSwitchHook', num_last_epochs=15, priority=48),
     dict(
-        type='YOLOXModeSwitchHook',
-        num_last_epochs=num_last_epochs,
-        priority=48
-    ),
-    dict(
-        type='SyncNormHook',
-        num_last_epochs=num_last_epochs,
-        interval=1,
-        priority=48
-    ),
-    dict(type='ExpMomentumEMAHook', resume_from=resume_from, priority=49)
+        type='ExpMomentumEMAHook',
+        resume_from=resume_from,
+        momentum=0.0002,
+        total_iter=500,
+        priority=49
+    )
 ]
